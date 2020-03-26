@@ -39,6 +39,7 @@ ipcRenderer.on('worker-paste-start', function(event, content){
     (function waitAndWrite (i) {          
         setTimeout(function () {  
           if (isInterrupted) {
+            ipcRenderer.send('worker-paste-error');
             return;
           }
           handleKeypress(content.charAt(content.length - i));             

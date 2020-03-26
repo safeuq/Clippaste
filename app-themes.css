@@ -10,6 +10,10 @@
     --button-shadow-hover: rgb(0, 98, 190);
     --button-text: white;
 
+    --processing-bg: rgb(179, 122, 0);
+    --success-bg: rgb(0, 179, 140);
+    --error-bg: rgb(179, 0, 45);
+
     --global-font: "Helvetica Neue", "Lucida Grande", "Segoe UI", Roboto, sans-serif;
-    --global-font-mono: "Lucida Console", Monaco, monospace;
+    --global-font-mono: "Menlo", "Lucida Console", Monaco, monospace;
 }

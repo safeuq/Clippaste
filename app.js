@@ -57,7 +57,8 @@ function createWindow() {
     height: 400,
     minWidth: 300,
     minHeight: 300,
-    title: 'Xoth',
+    maxWidth: 800,
+    maxHeight: 800,
     show: false,
     webPreferences: {
       nodeIntegration: true,
@@ -106,30 +107,36 @@ ipcMain.on('initiate-paste', (event, content) => {
 
 ipcMain.on('worker-paste-complete', () => {
   mainWindow.removeAllListeners('focus');
-  mainWindow.webContents.send('paste-complete', 'Done');
+  mainWindow.webContents.send('paste-complete');
+});
+
+ipcMain.on('worker-paste-error', () => {
+  mainWindow.removeAllListeners('focus');
+  mainWindow.webContents.send('paste-error');
 });
 
 ipcMain.on('open-preferences', showPreferencesWindow);
 
-const Menu = electron.Menu;
-const isMac = process.platform === 'darwin';
 
-let template = [
-  // { role: 'appMenu' }
-  ...(isMac ? [{
-    label: app.name,
-    submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideothers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' }
-    ]
-  }] : []),
-];
-let menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
+// const Menu = electron.Menu;
+// const isMac = process.platform === 'darwin';
+
+// let template = [
+//   // { role: 'appMenu' }
+//   ...(isMac ? [{
+//     label: app.name,
+//     submenu: [
+//       { role: 'about' },
+//       { type: 'separator' },
+//       { role: 'services' },
+//       { type: 'separator' },
+//       { role: 'hide' },
+//       { role: 'hideothers' },
+//       { role: 'unhide' },
+//       { type: 'separator' },
+//       { role: 'quit' }
+//     ]
+//   }] : []),
+// ];
+// let menu = Menu.buildFromTemplate(template);
+// Menu.setApplicationMenu(menu);
