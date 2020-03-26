@@ -1,31 +1,87 @@
 'use strict';
 
 const electron = require('electron');
-const robot = require('robotjs');
-const dialog = electron.dialog;
+const path = require('path');
 
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 
 let mainWindow;
+let workerWindow;
+let preferencesWindow;
+
+function showPreferencesWindow() {
+  if (preferencesWindow === undefined || 
+      preferencesWindow === null ||
+      preferencesWindow.isDestroyed()
+  ) {
+    preferencesWindow = new BrowserWindow({
+      width: 250,
+      height: 100,
+      resizable: false,
+      parent: mainWindow,
+      modal: true,
+      show: false,
+      icon: path.join(__dirname, 'icons/launcher/launcher_mac.png'),
+      webPreferences: {
+        nodeIntegration: true
+      }
+    });
+
+    preferencesWindow.loadFile('preferences.html');
+    preferencesWindow.once('ready-to-show', preferencesWindow.show);
+    preferencesWindow.addListener('blur', preferencesWindow.hide);
+    preferencesWindow.on('close', (event) => {
+      if (mainWindow === undefined || 
+          mainWindow === null || 
+          mainWindow.isDestroyed() 
+      ) {
+        preferencesWindow = null;
+      } else {
+        event.stopPropagation();
+        preferencesWindow.hide();
+      }
+    });
+  } else {
+    preferencesWindow.show();
+  }
+}
 /**
  * Creates a new main window
  */
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 400,
+    height: 400,
+    minWidth: 300,
+    minHeight: 300,
+    title: 'Xoth',
+    show: false,
     webPreferences: {
       nodeIntegration: true,
     },
   });
 
+  mainWindow.once('ready-to-show', mainWindow.show);
   mainWindow.loadFile('index.html');
-  mainWindow.on('close', (event) => {
+  mainWindow.on('close', () => {
     mainWindow = null;
   });
+  mainWindow.webContents.on('page-title-updated', function(e) {
+    e.preventDefault();
+  });
+
+  if (workerWindow === undefined) {
+    workerWindow = new BrowserWindow({
+      show: false,
+      webPreferences: { 
+        nodeIntegration: true 
+      }
+    });
+    workerWindow.loadFile('worker.html');
+  }
 }
 
 app.whenReady().then(createWindow);
@@ -36,126 +92,44 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
+  if (BrowserWindow.getAllWindows().length <= 1) {
     createWindow();
   }
 });
 
-/**
- * Converts a character to a RobotJS keystroke
- * @param {string} content
- */
-function textToKeyStroke(content) {
-  for (let i = 0; i < content.length; i++) {
-    if (content.charCodeAt(i) > 255) {
-      throw new Error('Unicode not supported');
-    }
-    if (content.charAt(i) === content.charAt(i).toLocaleUpperCase()) {
-      robot.keyTap(content.charAt(i), 'shift');
-      continue;
-    }
-    switch (content.charAt(i)) {
-      case '~':
-        robot.keyTap('`', 'shift');
-        break;
-      case '!':
-        robot.keyTap('1', 'shift');
-        break;
-      case '@':
-        robot.keyTap('2', 'shift');
-        break;
-      case '#':
-        robot.keyTap('3', 'shift');
-        break;
-      case '$':
-        robot.keyTap('4', 'shift');
-        break;
-      case '%':
-        robot.keyTap('5', 'shift');
-        break;
-      case '^':
-        robot.keyTap('6', 'shift');
-        break;
-      case '&':
-        robot.keyTap('7', 'shift');
-        break;
-      case '*':
-        robot.keyTap('8', 'shift');
-        break;
-      case '(':
-        robot.keyTap('9', 'shift');
-        break;
-      case ')':
-        robot.keyTap('0', 'shift');
-        break;
-      case '_':
-        robot.keyTap('-', 'shift');
-        break;
-      case '+':
-        robot.keyTap('=', 'shift');
-        break;
-      case '{':
-        robot.keyTap('[', 'shift');
-        break;
-      case '}':
-        robot.keyTap(']', 'shift');
-        break;
-      case '|':
-        robot.keyTap('\\', 'shift');
-        break;
-      case ':':
-        robot.keyTap(';', 'shift');
-        break;
-      case '"':
-        robot.keyTap('\'', 'shift');
-        break;
-      case '<':
-        robot.keyTap(',', 'shift');
-        break;
-      case '>':
-        robot.keyTap('.', 'shift');
-        break;
-      case '?':
-        robot.keyTap('/', 'shift');
-        break;
-      case ' ':
-        robot.keyTap('space');
-        break;
-      case '\n':
-        robot.keyTap('enter');
-        break;
-      default:
-        robot.keyTap(content.charAt(i));
-    }
-  }
-}
-
-ipcMain.on('initiate-paste', (event, ...args) => {
-  const content = args[0];
-  let isInterrupted = false;
-
-  if (mainWindow === null) {
-    throw new Error('No window present');
-  }
-  mainWindow.addListener('focus', (event) => isInterrupted = true );
-
-  robot.keyTap('tab', 'command');
-  robot.keyTap('enter');
-
-  for (let i = 0; i < content.length; i++) {
-    if (isInterrupted) {
-      dialog.showMessageBox(null, {
-        type: 'info',
-        message: 'Interrupted',
-      });
-      break;
-    }
-    robot.typeStringDelayed(content.charAt(i), 60000);
-  }
-  event.sender.send('paste-complete', 'Done');
-  mainWindow.removeAllListeners('focus');
-  dialog.showMessageBox(null, {
-    type: 'info',
-    message: 'Not interrupted',
+ipcMain.on('initiate-paste', (event, content) => {
+  workerWindow.webContents.send('worker-paste-start', content);
+  mainWindow.addListener('focus', () => {
+    workerWindow.webContents.send('worker-paste-interrupted');
   });
 });
+
+ipcMain.on('worker-paste-complete', () => {
+  mainWindow.removeAllListeners('focus');
+  mainWindow.webContents.send('paste-complete', 'Done');
+});
+
+ipcMain.on('open-preferences', showPreferencesWindow);
+
+const Menu = electron.Menu;
+const isMac = process.platform === 'darwin';
+
+let template = [
+  // { role: 'appMenu' }
+  ...(isMac ? [{
+    label: app.name,
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' }
+    ]
+  }] : []),
+];
+let menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);

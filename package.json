@@ -1,5 +1,6 @@
 {
   "name": "clip-paste",
+  "productName": "Clippaste",
   "version": "1.0.0",
   "description": "Copy and paste files with ease",
   "main": "app.js",
@@ -12,11 +13,13 @@
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
     "electron": "^8.1.1",
+    "electron-packager": "^14.2.1",
     "electron-rebuild": "^1.10.1",
     "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0"
   },
   "dependencies": {
+    "electron-store": "^5.1.1",
     "robotjs": "^0.6.0"
   }
 }

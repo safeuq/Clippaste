@@ -1,0 +1,15 @@
+@import "./fonts/fonts.css";
+
+:root {
+    --body-bg: rgb(236, 236, 236);
+    --title-text: black;
+    --textbox-border: gray;
+    --textbox-bg: white;
+    --button-bg: rgb(34, 148, 255);
+    --button-bg-hover: rgb(0, 122, 236);
+    --button-shadow-hover: rgb(0, 98, 190);
+    --button-text: white;
+
+    --global-font: "Helvetica Neue", "Lucida Grande", "Segoe UI", Roboto, sans-serif;
+    --global-font-mono: "Lucida Console", Monaco, monospace;
+}

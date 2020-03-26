@@ -1,22 +1,22 @@
-"use strict";
+'use strict';
 
-const electron = require("electron");
+const electron = require('electron');
 const remote = electron.remote;
 const ipcRenderer = electron.ipcRenderer;
 const Menu = remote.Menu;
 
 const InputMenu = Menu.buildFromTemplate([
-  { label: "Undo", role: "undo" },
-  { label: "Redo", role: "redo" },
-  { type: "separator" },
-  { label: "Cut", role: "cut" },
-  { label: "Copy", role: "copy" },
-  { label: "Paste", role: "paste" },
-  { type: "separator" },
-  { label: "Select all", role: "selectall" }
+  { label: 'Undo', role: 'undo' },
+  { label: 'Redo', role: 'redo' },
+  { type: 'separator' },
+  { label: 'Cut', role: 'cut' },
+  { label: 'Copy', role: 'copy' },
+  { label: 'Paste', role: 'paste' },
+  { type: 'separator' },
+  { label: 'Select all', role: 'selectall' }
 ]);
 
-document.body.addEventListener("contextmenu", event => {
+document.body.addEventListener('contextmenu', event => {
   event.preventDefault();
   event.stopPropagation();
 
@@ -31,19 +31,19 @@ document.body.addEventListener("contextmenu", event => {
   }
 });
 
-document.getElementsByClassName("paste-button")[0].onclick = function() {
-  const content = document.getElementsByClassName("child textpane")[0]
+document.getElementsByClassName('paste-button')[0].onclick = function() {
+  const content = document.getElementsByClassName('child textpane')[0]
     .textContent;
-  ipcRenderer.send("initiate-paste", content);
+  ipcRenderer.send('initiate-paste', content);
 };
 
-ipcRenderer.on("paste-complete", (event, ...args) => {
-  alert(args);
+ipcRenderer.on('paste-complete', (event, ...args) => {
+  // alert(args);
 });
 
 document
-  .getElementsByClassName("child textpane")[0]
-  .addEventListener("paste", function(event) {
+  .getElementsByClassName('child textpane')[0]
+  .addEventListener('paste', function(event) {
     let clipboardData;
     let pastedData;
 
@@ -53,7 +53,10 @@ document
 
     // Get pasted data via clipboard API
     clipboardData = event.clipboardData || window.clipboardData;
-    pastedData = clipboardData.getData("Text");
+    pastedData = clipboardData.getData('Text');
 
     event.target.textContent = pastedData;
   });
+
+document.getElementsByClassName('pic settings')[0]
+  .addEventListener('click', () => ipcRenderer.send('open-preferences'));
