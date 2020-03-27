@@ -6,6 +6,9 @@ const path = require('path');
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
+const Menu = electron.Menu;
+
+const isMac = process.platform === 'darwin';
 
 let mainWindow;
 let workerWindow;
@@ -75,6 +78,10 @@ function createWindow() {
     e.preventDefault();
   });
 
+  if (!isMac) {
+    mainWindow.removeMenu();
+  }
+
   if (workerWindow === undefined) {
     workerWindow = new BrowserWindow({
       show: false,
@@ -118,26 +125,20 @@ ipcMain.on('worker-paste-error', () => {
 
 ipcMain.on('open-preferences', showPreferencesWindow);
 
-
-// const Menu = electron.Menu;
-// const isMac = process.platform === 'darwin';
-
-// let template = [
-//   // { role: 'appMenu' }
-//   ...(isMac ? [{
-//     label: app.name,
-//     submenu: [
-//       { role: 'about' },
-//       { type: 'separator' },
-//       { role: 'services' },
-//       { type: 'separator' },
-//       { role: 'hide' },
-//       { role: 'hideothers' },
-//       { role: 'unhide' },
-//       { type: 'separator' },
-//       { role: 'quit' }
-//     ]
-//   }] : []),
-// ];
-// let menu = Menu.buildFromTemplate(template);
-// Menu.setApplicationMenu(menu);
+if (isMac) {
+  let menu = Menu.buildFromTemplate([{
+    label: app.name,
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' }
+    ]
+  }]);
+  Menu.setApplicationMenu(menu);
+}
