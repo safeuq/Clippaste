@@ -5,7 +5,8 @@
   "description": "Copy and paste files with ease",
   "main": "app.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "rebuild": "npm install -D electron-rebuild && npx electron-rebuild -f -t prod,optional,dev -w robotjs"
   },
   "author": "Safeuq",
   "license": "ISC",

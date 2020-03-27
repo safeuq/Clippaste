@@ -20,8 +20,8 @@ function showPreferencesWindow() {
       preferencesWindow.isDestroyed()
   ) {
     preferencesWindow = new BrowserWindow({
-      width: 250,
-      height: 100,
+      width: 230,
+      height: 120,
       resizable: false,
       parent: mainWindow,
       modal: true,
@@ -32,22 +32,16 @@ function showPreferencesWindow() {
       }
     });
 
+    if (!isMac) {
+      preferencesWindow.removeMenu();
+    }
+
     preferencesWindow.loadFile('preferences.html');
     preferencesWindow.once('ready-to-show', preferencesWindow.show);
     preferencesWindow.addListener('blur', preferencesWindow.hide);
     preferencesWindow.on('close', (event) => {
-      if (mainWindow === undefined || 
-          mainWindow === null || 
-          mainWindow.isDestroyed() 
-      ) {
-        preferencesWindow = null;
-      } else {
-        event.stopPropagation();
-        preferencesWindow.hide();
-      }
+      preferencesWindow = null;
     });
-  } else {
-    preferencesWindow.show();
   }
 }
 /**
@@ -74,6 +68,7 @@ function createWindow() {
   mainWindow.on('close', () => {
     mainWindow = null;
   });
+  mainWindow.webContents.openDevTools();
   mainWindow.webContents.on('page-title-updated', function(e) {
     e.preventDefault();
   });
