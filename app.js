@@ -21,7 +21,7 @@ function showPreferencesWindow() {
   ) {
     preferencesWindow = new BrowserWindow({
       width: 230,
-      height: 120,
+      height: isMac ? 100 : 120,
       resizable: false,
       parent: mainWindow,
       modal: true,

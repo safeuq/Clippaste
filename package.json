@@ -6,7 +6,9 @@
   "main": "app.js",
   "scripts": {
     "start": "electron .",
-    "rebuild": "npm install -D electron-rebuild && npx electron-rebuild -f -t prod,optional,dev -w robotjs"
+    "rebuild": "npm install -D electron-rebuild && npx electron-rebuild -f -t prod,optional,dev -w robotjs",
+    "release-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=icons/launcher/launcher_mac.icns --prune=true --out=release-builds",
+    "release-win32": "electron-packager . --overwrite --platform=win32 --arch=ia32 --icon=icons/launcher/launcher_win.ico --prune=true --out=release-builds"
   },
   "author": "Safeuq",
   "license": "ISC",
