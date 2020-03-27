@@ -68,7 +68,6 @@ function createWindow() {
   mainWindow.on('close', () => {
     mainWindow = null;
   });
-  mainWindow.webContents.openDevTools();
   mainWindow.webContents.on('page-title-updated', function(e) {
     e.preventDefault();
   });
