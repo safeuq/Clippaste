@@ -60,6 +60,7 @@ function createWindow() {
     maxWidth: 800,
     maxHeight: 800,
     show: false,
+    alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
     },
